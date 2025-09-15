@@ -1,12 +1,10 @@
 @import 'variables';
 
-html {
-  font-family: Arial, sans-serif;
-}
-
-* {
+html,
+body {
   margin: 0;
-  padding: 0;
+  height: 100%;
+  font-family: $calendar-font-family;
 }
 
 body {
@@ -16,54 +14,67 @@ body {
   height: 100vh;
 }
 
-@each $day, $index in $days {
-  $index: $index + 6;
-  .calendar--start-day-#{$day} > :first-child {
-    margin-left: calc((#{$calendar-day-size} + #{$calendar-gap}) * #{$index});
-  }
-}
-
 .calendar {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
   gap: $calendar-gap;
   padding: 10px;
-  width: 707px;
+  width: calc(7 * #{$calendar-day-size} + 6 * #{$calendar-gap});
 
   &__day {
-    background-color: $calendar-bg-color;
+    position: relative;
     width: $calendar-day-size;
     height: $calendar-day-size;
-    border: 1px solid #000;
+    background-color: $calendar-bg-color;
+    border: 1px solid $calendar-border-color;
     display: flex;
-    align-items: center;
     justify-content: center;
-    position: relative;
-    transition: all 0.5s;
-    text-align: center;
+    align-items: center;
     box-sizing: border-box;
+    cursor: default;
+    transition:
+      background-color $calendar-animation-time,
+      transform $calendar-animation-time;
 
-    @for $day from 1 through 31 {
-      &:nth-child(#{$day})::before {
-        content: '#{$day}';
-        font-family: $calendar-font-family;
-        font-size: $calendar-font-size;
-      }
+    &::before {
+      content: '';
+      font-size: $calendar-font-size;
+      color: black;
+      pointer-events: none;
     }
 
     &:hover {
+      background-color: $calendar-hover-bg;
       cursor: pointer;
-      background-color: #ffbfcb;
       transform: translateY(-20px);
+      z-index: 2;
+    }
+  }
+
+  @each $day, $index in $days {
+    &--start-day-#{$day} > &__day:first-child {
+      margin-left: calc(($calendar-day-size + $calendar-gap) * #{$index});
     }
   }
 }
 
-@for $day from 1 through 31 {
-  .calendar__day:nth-child(#{$day})::before {
-    content: '#{$day}';
-    font-family: $calendar-font-family;
-    font-size: $calendar-font-size;
+// Добавляем номера дней 1..31
+@for $i from 1 through 31 {
+  .calendar__day:nth-child(#{$i})::before {
+    content: '#{$i}';
+  }
+}
+
+// Скрываем дни, превышающие длину месяца
+@for $len from 28 through 31 {
+  .calendar--month-length-#{$len} .calendar__day:nth-child(n + #{$len + 1}) {
+    display: none;
+  }
+}
+
+// Сдвигаем первый день под нужный день недели по модификатору
+@each $day, $index in $days {
+  .calendar--start-day-#{$day} > .calendar__day:first-child {
+    margin-left: calc(($calendar-day-size + $calendar-gap) * #{$index});
   }
 }
